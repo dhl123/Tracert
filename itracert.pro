@@ -10,7 +10,10 @@ CONFIG -= app_bundle
 TEMPLATE = app
 
 SOURCES += main.cpp \
-    icmp_sender.cpp
+    icmp_sender.cpp \
+    ip_locator.cpp \
+    traceroute.cpp \
+    utils.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -29,4 +32,7 @@ LIBS += iphlpapi.lib
 HEADERS += \
     ip_header.h \
     icmp_header.h \
-    icmp_sender.h
+    icmp_sender.h \
+    ip_locator.h \
+    traceroute.h \
+    utils.h

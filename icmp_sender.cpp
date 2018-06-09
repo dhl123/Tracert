@@ -1,24 +1,45 @@
 #include "icmp_sender.h"
 #include "icmp_header.h"
 #include "ip_header.h"
+#include "utils.h"
 #include <QDebug>
 
+/* Create ICMP Sender.
+ * Parameters:
+ *      WSADATA wsa: WSAStartup returns, store Windows Sockets data
+ * Example:
+ *      WSADATA wsa;
+ *      if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
+ *          return -1;
+ *      }
+ *      icmp_sender* sender = new icmp_sender(wsa);
+ */
 icmp_sender::icmp_sender(WSADATA wsa) {
     this->wsa = wsa;
     create_socket();
 }
 
-DECODE_RESULT icmp_sender::send_packet(QString addr, int ttl, int seqno) {
+/* Send ICMP Echo Request packet.
+ * Parameters:
+ *      QString ip: IP of target remote
+ *      int ttl: Time to live
+ *      int seqno: Sequence number
+ * Returns:
+ *      DECODE_RESULT: Parse result of response packet from remote
+ * Example:
+ *      DECODE_RESULT result = sender->send_packet(QString("202.101.226.69"), 30, 0);
+ *      std::cout << result.round_trip_time;
+ */
+DECODE_RESULT icmp_sender::send_packet(QString ip, int ttl, int seqno) {
     // host resolve
-    u_long dest_ip = this->ip_conversion(addr);
+    u_long dest_ip = address_conversion(ip);
 
     DECODE_RESULT decode_result;
-    decode_result.error_code = 0;
+    decode_result.error_code = SENDER_SUCCESS;
 
     if (dest_ip == -1) {
-        decode_result.error_code = -1;
+        decode_result.error_code = SENDER_INVALID_HOST;
         return decode_result;
-        //TODO: error handler
     }
 
     // data buffer
@@ -53,11 +74,10 @@ DECODE_RESULT icmp_sender::send_packet(QString addr, int ttl, int seqno) {
 
     // send icmp
     if (sendto(this->raw_socket, icmp_send_buf, sizeof(icmp_send_buf), 0, (sockaddr*)&dest_sock_addr, sizeof(dest_sock_addr)) == SOCKET_ERROR) {
-        // error handler
         if (WSAGetLastError() == WSAEHOSTUNREACH) {
-            decode_result.error_code = WSAEHOSTUNREACH;
             closesocket(this->raw_socket);
             WSACleanup();
+            decode_result.error_code = SENDER_SEND_HOST_UNREACH;
             return decode_result;
         }
     }
@@ -74,12 +94,11 @@ DECODE_RESULT icmp_sender::send_packet(QString addr, int ttl, int seqno) {
                 return decode_result;
             }
         } else if (WSAGetLastError() == WSAETIMEDOUT) {
-            //TODO: ERROR HANDLER
-            decode_result.error_code = WSAETIMEDOUT;
+            decode_result.error_code = SENDER_SEND_TIMEDOUT;
             return decode_result;
         } else {
             //TODO: ERROR HANDLER
-            decode_result.error_code = WSAGetLastError();
+            decode_result.error_code = SENDER_SEND_WSAERROR;
             closesocket(this->raw_socket);
             WSACleanup();
             return decode_result;
@@ -89,41 +108,20 @@ DECODE_RESULT icmp_sender::send_packet(QString addr, int ttl, int seqno) {
     return decode_result;
 }
 
-u_long icmp_sender::ip_conversion(QString addr) {
-    std::string str = addr.toStdString();
-    const char* cstr_addr = str.c_str();
-
-    u_long dest = inet_addr(cstr_addr);
-    // conversion failed, maybe a domain
-    if (dest == INADDR_NONE) {
-        hostent* domain = gethostbyname(cstr_addr);
-        // host by domain
-        if (domain) {
-            dest = (*(in_addr*)domain->h_addr).s_addr;
-        } else {
-            //TODO: ERROR HANDLER
-            return -1; //TODO: USING CONST INSTEAD OF MAGIC NUMBER
-        }
-    }
-    return dest;
-}
-
 int icmp_sender::create_socket() {
     SOCKET sock_raw = WSASocket(AF_INET, SOCK_RAW, IPPROTO_ICMP, NULL, 0, WSA_FLAG_OVERLAPPED);
     if (sock_raw == INVALID_SOCKET) {
-        //TODO: ERROR HANDLER
         WSACleanup();
-        return -1;
+        return SENDER_SOCKET_INVALID;
     }
     this->raw_socket = sock_raw;
 
     int timeout = DEF_ICMP_TIMEOUT;
 
     if (setsockopt(sock_raw, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, sizeof(timeout)) == SOCKET_ERROR) {
-        //TODO: ERROR HANDLER
         closesocket(sock_raw);
         WSACleanup();
-        return -1; //TODO: USE CONST INSTEAD OF MAGIC NUMBER
+        return SENDER_SOCKET_OPTFAIL;
     }
     return 0;
 }

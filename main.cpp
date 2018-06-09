@@ -5,6 +5,9 @@
 #include <iphlpapi.h>
 #include <icmpapi.h>
 #include "icmp_sender.h"
+#include "ip_locator.h"
+#include "traceroute.h"
+#include "utils.h"
 #include <iostream>
 
 #define TARGET "220.181.57.216"
