@@ -44,25 +44,25 @@ DECODE_RESULT icmp_sender::send_packet(QString ip, int ttl, int seqno) {
         return decode_result;
     }
 
-    HANDLE hIcmp;
-    if ((hIcmp = IcmpCreateFile()) == INVALID_HANDLE_VALUE) {
+    HANDLE icmp;
+    if ((icmp = IcmpCreateFile()) == INVALID_HANDLE_VALUE) {
         decode_result.error_code = SENDER_SOCKET_INVALID;
         return decode_result;
     }
-    IP_OPTION_INFORMATION IpOption;
-    ZeroMemory(&IpOption,sizeof(IP_OPTION_INFORMATION));
-    IpOption.Ttl = ttl;
-    char SendData[32];
-    memset(SendData,'0',sizeof(SendData));
-    char ReplyBuffer[sizeof(ICMP_ECHO_REPLY)+32];
-    PICMP_ECHO_REPLY pEchoReply = (PICMP_ECHO_REPLY)ReplyBuffer;
+    IP_OPTION_INFORMATION ip_option;
+    ZeroMemory(&ip_option, sizeof(IP_OPTION_INFORMATION));
+    ip_option.Ttl = ttl;
+    char send_data[32];
+    memset(send_data, '0', sizeof(send_data));
+    char reply_buffer[sizeof(ICMP_ECHO_REPLY) + 32];
+    PICMP_ECHO_REPLY eche_reply = (PICMP_ECHO_REPLY)reply_buffer;
 
-    if(IcmpSendEcho(hIcmp,(IPAddr)dest_ip, SendData, sizeof(SendData), &IpOption,
-                    ReplyBuffer, sizeof(ReplyBuffer), DEF_ICMP_TIMEOUT)!=0) {
-        decode_result.round_trip_time = pEchoReply->RoundTripTime;
-        decode_result.ip_addr = *(in_addr*)&(pEchoReply->Address);
-        decode_result.type = ICMP_TIMEOUT;
-        if((unsigned long)pEchoReply->Address==dest_ip) {
+    if (IcmpSendEcho(icmp, (IPAddr)dest_ip, send_data, sizeof(send_data), &ip_option,
+                     reply_buffer, sizeof(reply_buffer), DEF_ICMP_TIMEOUT) != 0) {
+        decode_result.round_trip_time = eche_reply->RoundTripTime;
+        decode_result.ip_addr = *(in_addr*)&(eche_reply->Address);
+        decode_result.type = ICMP_TTL_EXCEEDED;
+        if ((unsigned long)eche_reply->Address == dest_ip) {
             decode_result.type = ICMP_ECHO;
         }
     } else {
@@ -70,7 +70,7 @@ DECODE_RESULT icmp_sender::send_packet(QString ip, int ttl, int seqno) {
         decode_result.error_code = SENDER_SEND_TIMEDOUT;
     }
 
-    IcmpCloseHandle(hIcmp);
+    IcmpCloseHandle(icmp);
 
     return decode_result;
 }

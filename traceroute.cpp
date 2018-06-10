@@ -1,5 +1,6 @@
 #include "traceroute.h"
 #include "icmp_sender.h"
+#include "utils.h"
 #include <QDebug>
 
 traceroute::traceroute(QObject *parent, QString host, int packet_count, int max_hop) : QObject(parent) {
@@ -9,17 +10,17 @@ traceroute::traceroute(QObject *parent, QString host, int packet_count, int max_
     WSADATA wsa;
     if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
         //TODO: ERROR HANDLER
-        return ;
+        return;
     }
-    this->sender=new icmp_sender(wsa);
+    this->sender = new icmp_sender(wsa);
 }
 
 void traceroute::start_trace() {
     int ttl = 1;
     this->allowTrace = 1;
-    while(ttl <= max_hop && allowTrace) {
+    while (ttl <= max_hop && allowTrace) {
         QList<int> delay;
-        DECODE_RESULT result =sender->send_packet(host,ttl,0);
+        DECODE_RESULT result = sender->send_packet(host,ttl,0);
         QString ip_str = QString(inet_ntoa(result.ip_addr));
         delay.append(result.round_trip_time);
         if (result.error_code < 0) {
@@ -32,14 +33,16 @@ void traceroute::start_trace() {
                 ttl += 1;
             }
         } else {
-            if (result.type == ICMP_TIMEOUT) {
+            if (result.type == ICMP_TTL_EXCEEDED) {
                 emit on_trace_receive(ttl, ip_str, delay);
-                ttl += 1;
                 qDebug() << ttl << " " << ip_str << " " << result.round_trip_time;
+                qDebug() << ip_to_hostname(ip_str);
+                ttl += 1;
             }
             if (result.type == ICMP_ECHO) {
                 emit on_trace_receive(ttl, host, delay);
                 qDebug() << ttl << " " << ip_str << " " << result.round_trip_time;
+                qDebug() << ip_to_hostname(ip_str);
                 stop_trace();
                 qDebug() << "Trace completed.";
                 return;
