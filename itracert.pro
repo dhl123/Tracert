@@ -24,9 +24,7 @@ SOURCES += main.cpp \
 DEFINES += QT_DEPRECATED_WARNINGS
 
 
-LIBS += iphlpapi.lib
-LIBS += -luser32 # for using Windows API
-
+LIBS += -liphlpapi -luser32 -lws2_32 # for using Windows API
 
 # You can also make your code fail to compile if you use deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -34,8 +32,6 @@ LIBS += -luser32 # for using Windows API
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 HEADERS += \
-    ip_header.h \
-    icmp_header.h \
     icmp_sender.h \
     ip_locator.h \
     traceroute.h \

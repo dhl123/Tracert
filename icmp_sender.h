@@ -20,6 +20,12 @@ const int SENDER_PARSE_UNKNOWN_TYPE = -301;
 const int SENDER_PARSE_INVAILD_ID = -302;
 const int SENDER_PARSE_FAILURE = -303;
 
+const DWORD DEF_ICMP_TIMEOUT = 5000;
+
+const BYTE ICMP_ECHO = 0;
+const BYTE ICMP_ECHO_REQUEST = 8;
+const BYTE ICMP_TIMEOUT = 11;
+
 typedef struct {
     // Sequecen number
     USHORT seq_no;
@@ -46,11 +52,6 @@ public:
 
 private:
     WSADATA wsa;
-    SOCKET raw_socket;
-    u_long ip_conversion(QString addr);
-    int create_socket();
-    ushort calc_checksum(ushort* buf, int size);
-    BOOL decode_icmp(char* buf, int packet_size, DECODE_RESULT& decode_result);
 };
 
 #endif // ICMP_SENDER_H
