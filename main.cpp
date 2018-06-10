@@ -9,16 +9,20 @@
 #include "traceroute.h"
 #include "utils.h"
 #include <iostream>
-
+#include <QCoreApplication>
+#include<qdebug.h>
 #define TARGET "220.181.57.216"
 
-int main() {
+int main(int argc,char** argv) {
+    QCoreApplication a(argc,argv);
     WSADATA wsa;
     if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
         //TODO: ERROR HANDLER
         return -1;
     }
-    icmp_sender sender(wsa);
-    DECODE_RESULT result = sender.send_packet(QString(TARGET), 30, 0);
-    std::cout << result.round_trip_time;
+
+    ip_locator* locator=new ip_locator(nullptr);
+
+    locator->send_request(QString("118.28.8.8"),0);
+    return a.exec();
 }

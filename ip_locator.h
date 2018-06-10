@@ -1,6 +1,6 @@
 #ifndef IP_LOCATOR_H
 #define IP_LOCATOR_H
-
+#define _AFXDLL
 #include <QObject>
 
 const QString API_KEY = QString("XKPBZ-VM3EO-UI4W2-SCLNC-TJAKQ-AZFBH");

@@ -1,3 +1,4 @@
+QT += network
 QT += core
 QT -= gui
 
@@ -21,8 +22,10 @@ SOURCES += main.cpp \
 # deprecated API in order to know how to port your code away from it.
 DEFINES += QT_DEPRECATED_WARNINGS
 
-LIBS += -lws2_32
+
 LIBS += iphlpapi.lib
+LIBS += -luser32 # for using Windows API
+
 
 # You can also make your code fail to compile if you use deprecated APIs.
 # In order to do so, uncomment the following line.
