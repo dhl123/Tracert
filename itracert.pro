@@ -14,7 +14,8 @@ SOURCES += main.cpp \
     icmp_sender.cpp \
     ip_locator.cpp \
     traceroute.cpp \
-    utils.cpp
+    utils.cpp \
+    send_thread.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -38,4 +39,5 @@ HEADERS += \
     icmp_sender.h \
     ip_locator.h \
     traceroute.h \
-    utils.h
+    utils.h \
+    send_thread.h

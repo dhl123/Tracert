@@ -11,6 +11,8 @@
 #include <iostream>
 #include <QCoreApplication>
 #include<qdebug.h>
+#include<icmp_sender.h>
+#include<traceroute.h>
 #define TARGET "220.181.57.216"
 
 int main(int argc,char** argv) {
@@ -20,9 +22,12 @@ int main(int argc,char** argv) {
         //TODO: ERROR HANDLER
         return -1;
     }
-
-    ip_locator* locator=new ip_locator(nullptr);
+    icmp_sender* sender=new icmp_sender(wsa);
+    /*ip_locator* locator=new ip_locator(nullptr);
 
     locator->send_request(QString("118.28.8.8"),0);
-    return a.exec();
+    return a.exec();*/
+    traceroute* trace=new traceroute(nullptr,QString("202.101.226.69"),1);
+    trace->start_trace();
+
 }
