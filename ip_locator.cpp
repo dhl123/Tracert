@@ -7,54 +7,37 @@
 #include <QDebug>
 #include <QJsonObject>
 #include <QJsonDocument>
+#include <windows.h>
 
 ip_locator::ip_locator(QObject *parent) : QObject(parent) {
 
 }
 
 void ip_locator::send_request(QString ip, int id) {
-    QString url = "http://freeapi.ipip.net/"+ip;
+    QString url = "http://api.map.baidu.com/location/ip?ip=" + ip + "&ak=DF03bd597218e49903a0656fce0b1067&coor=gcj02";
+
     QNetworkRequest request;
     request.setUrl(QUrl(url));
 
     QNetworkAccessManager* manage = new QNetworkAccessManager();
     manage->get(request);
     connect(manage, &QNetworkAccessManager::finished, this, [=](QNetworkReply *reply) {
-        QString message = QString(reply->readAll());
-        message.remove("\"");
-        message.remove("[");
-        message.remove("]");
-        QString m1 = message.section(',', 1, 1);
-        QString m2 = message.section(',', 2, 2);
-        QString city;
-        if(m1 == m2) {
-            city = m1 + message.section(',', 3, 3);
-        } else {
-            city = m1 + m2 + message.section(',', 3, 3);
-        }
+        QByteArray data = reply->readAll();
+        QJsonDocument jsonDocument = QJsonDocument::fromJson(data);
+        QJsonObject json_message = jsonDocument.object();
+        QJsonValue result_base = json_message.take("content");
 
-        QString url = "http://apis.map.qq.com/ws/geocoder/v1/?address=" + city + "&&key=XKPBZ-VM3EO-UI4W2-SCLNC-TJAKQ-AZFBH";
+        json_message = result_base.toObject();
+        QJsonValue result = json_message.take("point");
 
-        QNetworkRequest request;
-        request.setUrl(QUrl(url));
+        json_message = result.toObject();
+        double lng=json_message.take("y").toVariant().toDouble();
+        double lat=json_message.take("x").toVariant().toDouble();
 
-        QNetworkAccessManager* manage = new QNetworkAccessManager();
-        manage->get(request);
-        connect(manage, &QNetworkAccessManager::finished, this, [=](QNetworkReply *reply) {
 
-            QJsonDocument jsonDocument = QJsonDocument::fromJson(reply->readAll());
-            QJsonObject json_message = jsonDocument.object();
-            QJsonValue result = json_message.take("result");
-
-            json_message = result.toObject();
-            result = json_message.take("location");
-
-            json_message = result.toObject();
-            double lng=json_message.take("lng").toVariant().toDouble();
-            double lat=json_message.take("lat").toVariant().toDouble();
-
-            emit on_ip_located(id, city, lng, lat);
-        });
+        json_message = result_base.toObject();
+        QString city = json_message.take("address").toString();
+        emit on_ip_located(id, city, lng, lat);
     });
 }
 

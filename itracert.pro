@@ -1,12 +1,11 @@
 QT += network
 QT += core
-QT -= gui
+QT += gui widgets
+QT += concurrent
 
 CONFIG += c++11
 
 TARGET = itracert
-CONFIG += console
-CONFIG -= app_bundle
 
 TEMPLATE = app
 
@@ -15,7 +14,9 @@ SOURCES += main.cpp \
     ip_locator.cpp \
     traceroute.cpp \
     utils.cpp \
-    send_thread.cpp
+    send_thread.cpp \
+    mainwindow.cpp \
+    query_hostname_task.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -36,4 +37,9 @@ HEADERS += \
     ip_locator.h \
     traceroute.h \
     utils.h \
-    send_thread.h
+    send_thread.h \
+    mainwindow.h \
+    query_hostname_task.h
+
+FORMS += \
+    mainwindow.ui

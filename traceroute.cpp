@@ -28,23 +28,17 @@ void traceroute::start_trace() {
                 stop_trace();
                 return;
             } else {
-                emit on_trace_receive(ttl, ip_str, delay);
-                qDebug() << ttl << " Request timed out";
+                emit on_trace_receive(ttl, "", delay);
                 ttl += 1;
             }
         } else {
             if (result.type == ICMP_TTL_EXCEEDED) {
                 emit on_trace_receive(ttl, ip_str, delay);
-                qDebug() << ttl << " " << ip_str << " " << result.round_trip_time;
-                qDebug() << ip_to_hostname(ip_str);
                 ttl += 1;
             }
             if (result.type == ICMP_ECHO) {
-                emit on_trace_receive(ttl, host, delay);
-                qDebug() << ttl << " " << ip_str << " " << result.round_trip_time;
-                qDebug() << ip_to_hostname(ip_str);
+                emit on_trace_receive(ttl, ip_str, delay);
                 stop_trace();
-                qDebug() << "Trace completed.";
                 return;
             }
         }
