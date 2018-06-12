@@ -4,7 +4,8 @@
 #include <QObject>
 #include <WinSock2.h>
 #include <WS2tcpip.h>
-
+#include <QDebug>
+#include <QRunnable>
 const int SENDER_SUCCESS = 0;
 const int SENDER_INVALID_HOST = -1;
 
@@ -45,13 +46,15 @@ typedef struct {
     int error_code;
 } DECODE_RESULT;
 
-class icmp_sender {
+class icmp_sender :QObject{
+    Q_OBJECT
 public:
     explicit icmp_sender(WSADATA wsa);
     DECODE_RESULT send_packet(QString ip, int ttl, int seqno);
-
+//    void run();
 private:
     WSADATA wsa;
+    //parameter for send_packet
 };
 
 #endif // ICMP_SENDER_H

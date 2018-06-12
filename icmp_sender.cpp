@@ -19,6 +19,12 @@ icmp_sender::icmp_sender(WSADATA wsa) {
     this->wsa = wsa;
     // create_socket();
 }
+//icmp_sender::icmp_sender(WSADATA wsa,QString ip, int ttl, int seqno){
+//    this->wsa = wsa;
+//    this->ip = ip;
+//    this->ttl = ttl;
+//    this->seqno = seqno;
+//}
 
 /* Send ICMP Echo Request packet.
  * Parameters:
@@ -74,3 +80,10 @@ DECODE_RESULT icmp_sender::send_packet(QString ip, int ttl, int seqno) {
 
     return decode_result;
 }
+
+//void icmp_sender::run()
+//{
+////    int i=1;
+//    qDebug()<<"send packet ";
+//    send_packet(ip,ttl,seqno);
+//}

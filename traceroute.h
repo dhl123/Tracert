@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QList>
+#include <Qthread>
 #include<icmp_sender.h>
 
 const int DEF_MAX_HOP = 30;
@@ -20,10 +21,14 @@ public:
 
 private:
     int allowTrace;
+//    QThread m_thread;
 
 signals:
     void on_trace_receive(int no, QString source_ip, QList<int> delay);
     void on_trace_complete();
+    void resultReady(const QString &result);
+public slots:
+    void doWork();
 
 };
 
