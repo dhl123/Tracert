@@ -94,6 +94,7 @@ void MainWindow::on_trace_receive(int ttl, QString source_ip, QList<int> delay) 
 
 void MainWindow::on_trace_complete() {
     QMessageBox::information(this, "iTracert", "Trace complete.");
+    ui->label_2->setText("Trace complete.");
 }
 
 void MainWindow::on_ip_located(int id, QString city, double longtitude, double latitude) {
@@ -119,9 +120,15 @@ MainWindow::~MainWindow() {
 void MainWindow::on_pushButton_clicked() {
     this->trace_model->clear();
     this->initModel();
-    this->tracer = new traceroute(this, ui->lineEdit->text(), ui->lineEdit_2->text().toInt());
+    this->tracer = new traceroute(this, ui->lineEdit->text(), 3, ui->lineEdit_2->text().toInt());
     ui->label_2->setText("Tracing route to " + ui->lineEdit->text() + " over a maximum of "+ ui->lineEdit_2->text() + " hops:");
     connect(this->tracer, &traceroute::on_trace_receive, this, &MainWindow::on_trace_receive);
     connect(this->tracer, &traceroute::on_trace_complete, this, &MainWindow::on_trace_complete);
     QtConcurrent::run(tracer, &traceroute::start_trace);
+}
+
+void MainWindow::on_pushButton_2_clicked() {
+    if (this->tracer != nullptr) {
+        this->tracer->stop_trace();
+    }
 }
